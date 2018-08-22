@@ -1,0 +1,719 @@
+---
+title: "R Tutorial Rebuild"
+author: "Jfuen"
+date: "July 16, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+setwd("C:/Users/Jaime/Desktop/r-novice-inflammation")
+```{r}
+read.csv(file="C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header = FALSE)
+
+weight_kg<-55
+weight_kg
+weight_lb <- 2.2 * weight_kg
+weight_lb
+weight_kg<- 100.0
+weight_lb
+
+read.csv(file="C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header = FALSE)
+dat<- read.csv(file="C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header = FALSE)
+head(dat)
+class(dat)
+dim(dat)
+dat[1,1]
+dat[30,20]
+dat[5, ]
+patient_1 <- dat[1, ]
+max(patient_1)
+max(dat[2, ])
+sd(dat[ ,7])
+summary(dat[, 1:4])
+
+?apply
+help(apply)
+avg_patient_inflammation <- apply(dat, 1, mean)
+avg_day_inflammation <- apply(dat, 2, mean)
+avg_patient_inflammation
+max(dat[5, 3:7]) #maximum inflammation of 5 patients spanning 3 to 7 days
+?seq
+whichPatients<- seq(2, 60, 2)
+whichDay<- seq(1,5)
+dat2<- dat
+dim(dat2[whichPatients, whichDay])
+dat2[whichPatients, whichDay]<- dat2[whichPatients, whichDay]/2
+dat2
+```
+## Plotting
+```{r}
+plot(avg_day_inflammation)
+```
+```{r}
+max_day_inflammation <- apply(dat,2,max)
+plot(max_day_inflammation)
+```
+```{r}
+min_day_inflammation <- apply(dat, 2, min)
+plot(min_day_inflammation)
+```
+```{r}
+sd_day_inflammation <- apply(dat, 2, sd)
+plot(sd_day_inflammation)
+
+```
+##Creating Fxns
+```{r}
+farenheight_to_kelvin <- function(temp_F) {
+  temp_K <- ((temp_F-32)*(5/9))+273.15
+  return(temp_K)
+}
+
+farenheight_to_kelvin (32)
+```
+```{r}
+farenheight_to_kelvin(212)
+```
+```{r}
+
+kelvin_to_celsius <- function(temp_K){
+  temp_C <- temp_K - 273.15
+  return(temp_C)
+}
+
+kelvin_to_celsius(0)
+
+```
+```{r}
+farenheight_to_celsius <- function(temp_F){
+  temp_K <- farenheight_to_kelvin(temp_F)
+  temp_C <- kelvin_to_celsius(temp_K)
+  return(temp_C)
+}
+
+farenheight_to_celsius(32.0)
+
+```
+```{r}
+kelvin_to_celsius(farenheight_to_kelvin(32))
+
+```
+
+```{r}
+##Create a function
+
+fence <- function(wrapper, original){
+  answer <- c(wrapper, original, wrapper)
+  return(answer)
+}
+##fence function is composed of original and wrapper but returns wrapper at the bedding and end of original
+
+outside <- function(v){
+  first <- V[1]
+  last <- v[length(v)]
+  answer<- c(first, last)
+  return(answer)
+}
+
+##outside function is composed of a vector (v) and returns a vector made of the first and last elements
+```
+```{r}
+###Named Variables and the Scope of Variables
+input_1 <- 20
+mySum <- function(input_1, input_2 = 10) {
+  output <- input_1 + input_2
+  return(output)
+}
+
+mySum(input_1 = 1,3)
+mySum(3)
+###mySum(input_2 = 3) ###cannot run because input_1 has no default value, where input_2 has a default value of 10 if not specified 
+
+```
+```{r}
+###Testing and Documenting
+center <- function(data, desired){
+  new_data <- (data - mean(data)) + desired
+  return(new_data)
+}
+
+###Center test
+z <- c(0, 0, 0)
+z  
+
+center(z, 3)
+
+###Center actual data FXN
+
+
+read.csv(file = "C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header= FALSE) ##since using a cluster need to include full file path
+
+dat<- read.csv(file = "C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header = FALSE)
+  centered <- center(dat[, 4], 0)
+  head(centered)
+  
+```
+```{r}
+# original min
+min(dat[,4])
+
+#original mean
+mean(dat[,4])
+
+#original max
+max(dat[,4])
+
+#centered min
+min(centered)
+
+#centered mean
+mean(centered)
+
+#centered max
+max(centered)
+
+```
+```{r}
+#original std dev
+sd(dat[,4])
+
+#centered std dev
+sd(centered)
+
+#difference in std dev before and after
+sd(dat[,4]) - sd(centered)
+```
+```{r}
+#comparing two opbects for small differences
+
+all.equal(sd(dat[,4]), sd(centered))
+
+```
+```{r}
+###Functions to Create Graphs
+analyze <- function(filename) {
+  # Plots the average, min, and max inflammation over time.
+  # Input is character string of a csv file.
+  dat <- read.csv(file = filename, header = FALSE)
+  avg_day_inflammation <- apply(dat, 2, mean)
+  plot(avg_day_inflammation)
+  max_day_inflammation <- apply(dat, 2, max)
+  plot(max_day_inflammation)
+  min_day_inflammation <- apply(dat, 2, min)
+  plot(min_day_inflammation)
+}
+
+```
+```{r}
+###Rescaling
+
+##Rescale function takes a vector and scales the values to lie in the range of 0 to 1 where L is the lowest value in the vector and H is the highest value in the vector. 
+
+rescale<- function(v){
+  L<- min(v)
+  H<- max(v)
+  result<- (v-L)/(H-L)
+  return(result)
+}
+
+g<- c(4, 7, 10, 20)
+
+rescale(g)
+min(rescale(g))
+max(rescale(g))
+plot(rescale(g))
+
+```
+###Defining Defaults
+```{r}
+dat <- read.csv("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", FALSE)
+
+dat <- read.csv(header = FALSE, file = "C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv")
+###dat <- read.csv(FALSE, "C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv")
+###Error in read.table(file = file, header = header, sep = sep, quote = quote, : 'file' must be a character string or connection
+
+center <- function(data, desired = 0) {
+  # return a new vector containing the original data centered around the
+  # desired value (0 by default).
+  # Example: center(c(1, 2, 3), 0) => c(-1, 0, 1)
+  new_data <- (data - mean(data)) + desired
+  return(new_data)
+}
+
+test_data <- c(0, 0, 0, 0)
+center(test_data, 3)
+
+more_data <- 5 + test_data
+more_data
+
+center(more_data)
+
+```
+```{r}
+display <- function(a = 1, b = 2, c = 3) {
+  result <- c(a, b, c)
+  names(result) <- c("a", "b", "c")  # This names each element of the vector
+  return(result)
+}
+
+# no arguments
+display()
+
+# one argument
+display(55)
+
+# two arguments
+display(55, 66)
+
+# three arguments
+display(55, 66, 77)
+
+# only setting the value of c
+display(c = 77)
+```
+```{r}
+###Matching Arguments
+
+###A function with Default Argument Values
+
+rescale<-function(v, lower=0, upper=1){
+  L<- min(v)
+  H<- max(v)
+  result<- (v-L)/(H-L) * (upper-lower)+lower
+  return(result)
+}
+
+g<- c(4, 7, 10, 20)
+
+rescale(g)
+min(rescale(g))
+max(rescale(g))
+plot(rescale(g))
+
+```
+###Analyzing Multiple Data Sets
+```{r}
+analyze("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv")
+```
+```{r}
+analyze("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-02.csv")
+```
+### For Loops
+```{r}
+
+###standard way of writing function
+best_practice <- c("Let", "the", "computer", "do", "the", "work")
+print_words <- function(sentence) {
+  print(sentence[1])
+  print(sentence[2])
+  print(sentence[3])
+  print(sentence[4])
+  print(sentence[5])
+  print(sentence[6])
+}
+
+print_words(best_practice)
+
+best_practice[-6]
+
+print_words(best_practice[-6])
+
+
+```
+```{r}
+###Better approach and looping
+print_words <- function(sentence) {
+  for (word in sentence) {
+    print(word)
+  }
+}
+
+print_words(best_practice)
+
+print_words(best_practice[-6])
+
+```
+####THE for LOOP
+```{r}
+##for (variable in collection) {
+## do things with variable
+##}
+
+len <- 0
+vowels <- c("a", "e", "i", "o", "u")
+for (v in vowels) {
+  len <- len + 1
+}
+# Number of vowels
+len
+```
+
+```{r}
+letter <- "z"
+for (letter in c("a", "b", "c")) {
+  print(letter)
+}
+
+letter
+
+length(vowels)
+```
+###Printing Numbers
+```{r}
+seq(3)
+print_N<- function(N){
+  nseq<- seq(N)
+  for(num in nseq){
+    print(num)
+  }
+}
+  
+print_N(3)
+```
+###Summing Values
+```{r}
+## NEED TO REVIEW THIS
+
+## the total function calculates the sum of a vec (vector)-where every number is added to vec_sum which is 0, resulting in the sum of the numbers within the vector
+
+ total<- function(vec){
+  vec_sum<- 0
+  for (num in vec){
+    vec_sum<- vec_sum+num
+  }
+  return(vec_sum)
+}
+
+ex_vec <- c(4, 8, 15, 16, 23, 42)
+total(ex_vec)
+
+```
+###exponentiation
+```{r}
+2^4
+
+#write fxn called expo which uses a loop to calc the same
+
+#expo function takes a base and power where the result is the base times the number of times the power sequence or default to 1.
+
+expo<- function(base, power){
+  result<- 1
+    for (i in seq(power)){
+   result<- result*base
+ }
+  return(result)
+}
+
+expo(2,4)
+
+```
+###Processing Multiple Files
+```{r}
+list.files(path= "C:/Users/Jaime/Desktop/r-novice-inflammation/data", pattern= "csv")
+
+list.files(path = "C:/Users/Jaime/Desktop/r-novice-inflammation/data", pattern = "inflammation")
+
+list.files(path = "C:/Users/Jaime/Desktop/r-novice-inflammation/data", pattern = "csv", full.names = TRUE)
+
+list.files(path = "C:/Users/Jaime/Desktop/r-novice-inflammation/data", pattern = "inflammation", full.names = TRUE)
+
+
+#Testing analyze function
+
+filenames<- list.files(path = "C:/Users/Jaime/Desktop/r-novice-inflammation/data", 
+                       pattern = "inflammation-[0-9]{2}.csv", 
+                       full.names = TRUE)
+ filenames<- filenames[1:3]
+ for (f in filenames){
+   print(f)
+   analyze(f)
+ }
+```
+###using loops to analyze multiple files
+####write a function called analyze_all that takes a filename pattern as its sole argument and runs analyze for each file whose name matches the pattern.
+```{r}
+analyze_all<- function(pattern){
+  filenames<- list.files(path = "C:/Users/Jaime/Desktop/r-novice-inflammation/data", 
+                       pattern = pattern, 
+                       full.names = TRUE)
+  for(f in filenames){
+    analyze(f)
+  }
+}
+
+
+```
+###Making Choices
+```{r}
+pdf("inflammation-01.pdf")
+analyze("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv")
+dev.off()
+```
+```{r}
+
+
+num <- 37
+if (num > 100) {
+  print("greater")
+} else {
+  print("not greater")
+}
+print("done")
+
+num > 100
+
+num < 100
+
+```
+```{r}
+sign <- function(num) {
+  if (num > 0) {
+    return(1)
+  } else if (num == 0) {
+    return(0)
+  } else {
+    return(-1)
+  }
+}
+
+sign(-3)
+
+sign(0)
+
+sign(2/3)
+
+```
+
+```{r}
+if (1 > 0 & -1 > 0) {
+    print("both parts are true")
+} else {
+  print("at least one part is not true")
+}
+
+```
+
+```{r}
+if (1 > 0 | -1 > 0) {
+    print("at least one part is true")
+} else {
+  print("neither part is true")
+}
+```
+##Write a functionplot_dist that plots a box plot if the lecngth of the vector is greater than a specified threshold and a stripchart otherwise. (use boxplot and stripchart)
+```{r}
+plot_dist<- function(x, threshold){
+  if (length(x) > threshold){
+    boxplot(x)
+  } else{
+    stripchart(x)
+  }
+}
+
+## plot_dis is a function that uses some data x and threshold where if the lenght of x is greater than the threshold then we will get a boxplot of x,if not greater than the threshold then we get a stripchart of x
+```
+
+```{r}
+dat <- read.csv("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header = FALSE)
+plot_dist(dat[, 10], threshold = 10)     # day (column) 10
+```
+```{r}
+plot_dist(dat[1:5, 10], threshold = 10)     # samples(rows) 1-5 on day (column) 10
+```
+###Histogram instead of boxplot:
+###One of your collaborators prefers to see the distributions of the larger vectors as a histogram instead of as a boxplot. In order to choose between a histogram and a boxplot we will edit the function plot_dist and add an additional argument use_boxplot. By default we will set use_boxplot to TRUE which will create a boxplot when the vector is longer than threshold. When use_boxplot is set to FALSE, plot_dist will instead plot a histogram for the larger vectors. As before, if the length of the vector is shorter than threshold, plot_dist will create a stripchart. A histogram is made with the hist command in R.
+```{r}
+plot_dist<- function(x, threshold, use_boxplot = TRUE){
+  if (length(x) > threshold & use_boxplot){
+    boxplot(x)
+  } else if (length(x) > threshold & !use_boxplot){
+    hist(x)
+  }  else{
+    stripchart(x)
+  }
+}
+
+```
+
+```{r}
+dat <- read.csv("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", header = FALSE)
+plot_dist(dat[, 10], threshold = 10, use_boxplot = TRUE)   # day (column) 10 - create boxplot
+```
+
+```{r}
+plot_dist(dat[, 10], threshold = 10, use_boxplot = FALSE)  # day (column) 10 - create histogram
+```
+
+```{r}
+plot_dist(dat[1:5, 10], threshold = 10)                    # samples (rows) 1-5 on day (column) 10
+```
+
+###Find the Maximum Inflammation Score
+```{r}
+filenames <- list.files(path = "data", pattern = "C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-09.csv", full.names = TRUE)
+filename_max <- "" # filename where the maximum average inflammation patient is found
+patient_max <- 0 # index (row number) for this patient in this file
+average_inf_max <- 0 # value of the average inflammation score for this patient
+for (f in filenames) {
+  dat <- read.csv(file = f, header = FALSE)
+  dat.means <- apply(dat, 1, mean)
+  for (patient_index in length(dat.means)){
+    patient_average_inf <- dat.means[patient_index]
+    # Add your code here ...
+    # Add your code here ...
+if (patient_average_inf > average_inf_max) {
+  average_inf_max <- patient_average_inf
+  filename_max <- f
+  patient_max <- patient_index
+}
+  }
+}
+print(filename_max)
+print(patient_max)
+print(average_inf_max)
+
+
+```
+
+###Saving Automatically Generated Figures
+```{r}
+analyze <- function(filename, output = NULL) {
+  # Plots the average, min, and max inflammation over time.
+  # Input:
+  #    filename: character string of a csv file
+  #    output: character string of pdf file for saving
+  if (!is.null(output)) {
+    pdf(output)
+  }
+  dat <- read.csv(file = filename, header = FALSE)
+  avg_day_inflammation <- apply(dat, 2, mean)
+  plot(avg_day_inflammation)
+  max_day_inflammation <- apply(dat, 2, max)
+  plot(max_day_inflammation)
+  min_day_inflammation <- apply(dat, 2, min)
+  plot(min_day_inflammation)
+  if (!is.null(output)) {
+    dev.off()
+  }
+}
+```
+
+```{r}
+analyze <- function(filename, output = NULL) {
+  # Plots the average, min, and max inflammation over time.
+  # Input:
+  #    filename: character string of a csv file
+  #    output: character string of pdf file for saving
+  if (!is.null(output)) {
+    pdf(output)
+  }
+  dat <- read.csv(file = filename, header = FALSE)
+  avg_day_inflammation <- apply(dat, 2, mean)
+  plot(avg_day_inflammation)
+  max_day_inflammation <- apply(dat, 2, max)
+  plot(max_day_inflammation)
+  min_day_inflammation <- apply(dat, 2, min)
+  plot(min_day_inflammation)
+  if (!is.null(output)) {
+    dev.off()
+  }
+}
+
+
+```
+
+```{r}
+output <- NULL
+is.null(output)
+```
+```{r}
+
+!is.null(output)
+```
+```{r}
+analyze("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv")
+```
+```{r}
+dir.create("r-novice-inflammation/results")
+
+analyze("C:/Users/Jaime/Desktop/r-novice-inflammation/data/inflammation-01.csv", output = "r-novice-inflammation/results/inflammation-01.pdf")
+```
+```{r}
+f <- "inflammation-01.csv"
+sub("csv", "pdf", f)
+```
+```{r}
+file.path("results", sub("csv", "pdf", f))
+```
+```{r}
+analyze_all <- function(pattern) {
+  # Directory name containing the data
+  data_dir <- "data"
+  # Directory name for results
+  results_dir <- "results"
+  # Runs the function analyze for each file in the current working directory
+  # that contains the given pattern.
+  filenames <- list.files(path = data_dir, pattern = pattern)
+  for (f in filenames) {
+    pdf_name <- file.path(results_dir, sub("csv", "pdf", f))
+    analyze(file.path(data_dir, f), output = pdf_name)
+  }
+}
+```
+
+```{r}
+analyze_all("inflammation.*csv")
+```
+###Changing the Behavior of the Plot Command
+```{r}
+##One of your collaborators asks if you can recreate the figures with lines instead of points. Find the relevant argument to plot by reading the documentation (?plot), update analyze, and then recreate all the figures with analyze_all.
+
+?plot
+
+analyze <- function(filename, output = NULL){
+  if(!is.null(output)){
+    pdf(output)
+  }
+  dat <-read.csv(file = filename, header = FALSE)
+  avg_day_inflammation <- apply(dat, 2, mean)
+  plot(avg_day_inflammation, type = "1")
+  max_day_inflammation <- apply(dat, 2, max)
+  plot(max_day_inflammation, type = "1")
+  min_day_inflammation <- apply(dat, 2, min)
+  plot(min_day_inflammation, type = "1")
+  if(!is.null(ouput)){
+    dev.off()
+  }
+  
+}
+```
+
+#Command-Line Programs
+```{r}
+
+```
