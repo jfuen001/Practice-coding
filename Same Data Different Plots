@@ -1,0 +1,116 @@
+#Plotting the same data different ways
+---
+title: "Practice Plotting"
+author: "jfuen"
+date: "August 18, 2018"
+output: html_document
+---
+
+```{r}
+###Marc and Jaime
+library(tidyverse)
+library(gridExtra)
+library(psych)
+
+car_data <- mtcars
+
+test2 <- corr.test(select(car_data, wt, disp))$p["wt", "disp"]
+
+plot1 <- car_data %>% 
+  mutate(cyl = factor(cyl, 
+                      levels = c("4", "6", "8"), 
+                      labels = c("4-cylinder", "6-cylinder", "8-cylinder"))) %>% 
+  ggplot(aes(wt, disp, color = cyl)) + 
+  geom_point(show.legend = F, size = 2) + 
+  labs(x = "Weight", y = "Engine Size") +
+  coord_cartesian(xlim = c(0, 6), ylim = c(0, 500)) + 
+  theme_bw() + 
+  facet_wrap(~cyl)
+
+plot2 <- car_data %>% 
+  mutate(cyl = factor(cyl, 
+                      levels = c("4", "6", "8"), 
+                      labels = c("4-cylinder", "6-cylinder", "8-cylinder"))) %>% 
+  ggplot(aes(wt, disp, color = cyl)) + 
+  geom_point() + 
+  labs(x = "Weight", y = "Engine Size") +
+  coord_cartesian(xlim = c(0, 6), ylim = c(0, 500)) + 
+  theme_bw() + 
+  annotate("text", label = paste("P-value = ", 
+                                 format(test2, scientific = T)), x = 1.5, y = 450, size = 4) +
+  theme(legend.position = "bottom")
+
+grid.arrange(plot1, plot2, layout_matrix = rbind(c(1, 1, 1), c(2, 2, 2)))
+
+```
+```{r}
+###Pat and Begum
+library(tidyverse)
+library(cowplot)
+
+full_rsq <- cor(mtcars$disp, mtcars$wt)
+full <- mtcars %>%
+	ggplot(aes(x=disp, y=wt)) +
+	geom_point() +
+	geom_smooth(method=lm)
+
+
+partial_rsq <- mtcars %>%
+								select(disp, wt, cyl) %>%
+								group_by(cyl) %>%
+								summarize(correlation=cor(disp, wt))
+
+separate <- mtcars %>%
+	ggplot(aes(x=disp, y=wt)) +
+	geom_point() +
+	facet_grid(~cyl)
+
+
+
+ggdraw() + 
+	draw_plot(full,
+				x=0,y=.5,width=1,height=.5) +
+	draw_plot(separate,
+				x=0,y=0,width=1,height=.5)
+```
+```{r}
+
+###Kaitlyn and Sarah
+tests <- cor.test(mtcars$wt, mtcars$disp)
+p1 <- mtcars %>% ggplot(aes(wt, disp)) + geom_point() + facet_grid(. ~ cyl) + theme_bw()
+p2 <- mtcars %>% ggplot(aes(wt, disp)) + geom_point() +theme_bw() +annotate("text", x = 4, y = 25, label = paste("cor.test results =", tests$p.value))
+grid.arrange(p1,p2)
+```
+```{r}
+###Nick and Josh
+library(tidyverse)
+library(readxl)
+library(cowplot)
+library(Hmisc)
+
+fourcyl <- filter(mtcars, cyl == 4)
+sixcyl <- filter(mtcars, cyl == 6)
+eightcyl <- filter(mtcars, cyl == 8)
+fourcorr <- rcorr(fourcyl$wt, fourcyl$disp)
+wholecorr <- rcorr(mtcars$wt, mtcars$disp)
+sixcorr <- rcorr(sixcyl$wt, sixcyl$disp)
+eightcorr <- rcorr(eightcyl$wt, eightcyl$disp)
+
+wholeplot <- ggplot(mtcars, aes(x=wt, y = disp)) +
+  geom_point(size = 3) +
+  theme_classic()
+
+fourplot <- ggplot(fourcyl, aes(x=wt, y = disp)) +
+  geom_point(size = 3) +
+  theme_classic()
+
+sixplot <- ggplot(sixcyl, aes(x=wt, y = disp)) +
+  geom_point(size = 3) +
+  theme_classic()
+
+eightplot <- ggplot(fourcyl, aes(x=wt, y = disp)) +
+  geom_point(size = 3) +
+  theme_classic()
+
+plot_grid(wholeplot, fourplot, sixplot, eightplot, labels = c("A", "B", "C", "D"))
+```
